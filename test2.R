@@ -1,17 +1,16 @@
-library(tm)
-library(dplyr)
-books <- readRDS("vector_books.RDS")
+#######
+corpus <- readRDS("corpus.rda")   
+dtm <- DocumentTermMatrix(corpus)
+#dtm <- findFreqTerms(test2, 50)
+test <- removeSparseTerms(dtm, 0.01)
+test2 <- as.data.frame(as.matrix(test))
+Distances <- dist(test2, method = "euclidean")
+Clusters <- hclust(Distances, method= "ward.D")
+plot(Clusters)
 
-corpus_clean <- list()
-for (book in books) {
-    corpus <- VCorpus(VectorSource(as.String(book)))
-    
-    corpus2 <- corpus %>% 
-        tm_map(stripWhitespace) %>%
-        tm_map(content_transformer(tolower)) %>%
-        tm_map(removeWords, stopwords("english")) %>%
-        tm_map(stemDocument) 
-    
-    corpus_clean[[book]] <<- corpus2
-    print(paste(book, length(book)))
-}
+#Construct a vector of book names manually###
+metadata <- data.frame(names = character(), path = character(), author = character(), date = character())
+
+names <- c(names, "Greek and Roman Geography")
+names <- c(names, "The History of the Peloponnesian War")
+names <- c(names, "The History of the Decline and Fall of the Roman Empire")

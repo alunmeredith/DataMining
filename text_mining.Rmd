@@ -1,0 +1,61 @@
+---
+title: "Text Mining"
+author: "Alun"
+date: "12 March 2016"
+output: html_document
+---
+```{r libraries, message=FALSE, warning=FALSE, include=FALSE}
+require(tm)
+require()
+```
+
+First load in the corpus which has been extracted from the html files, collected into documents (books) and cleaned through tokenisation, stop words removal, case folding and class equivalence. Also chapter titles were removed. 
+
+```{r Load Data}
+corpus <- readRDS("corpus.rda")   
+dtm <- DocumentTermMatrix(corpus)
+dtm
+```
+
+We now have a document term matrix with a lot of sparsity, a very large maximal term length and 24 documents. 
+
+We can remove documents which appear in only one document:
+```{r Clean terms}
+dtm2 <- removeSparseTerms(dtm, 0.95) # Remove terms which only appear in 1 document
+
+dtm_df <- as.data.frame(as.matrix(dtm2))
+freq <- sort(colSums(dtm_df), decreasing = T)
+
+dtm2
+head(freq, 10)
+```
+
+The sparsity has deceased and the maximum term length is something more reasonable. However looking at the most frequent terms. Things like citi and roman appear over 10000 times. We don't want terms like this being overly weighted so we weight the terms by inverse document frequency.
+
+```{r TFIDF}
+dtm3 <- weightTfIdf(dtm2, normalize = T)
+dtm_df <- as.data.frame(as.matrix(dtm3))
+freq <- sort(colSums(dtm_df), decreasing = T)
+
+dtm3
+head(freq, 10)
+```
+
+We can see now using term frequency - inverse document frequency (tf-idf) that the highest weighted terms are now primarily names. herod, justinian etc. We also normalised when we did this, this prevents the long documents which are likely to have more of the same term having a bigger impact in the idf. 
+
+```{r hclust}
+rownames(dtm_df) <- shortnames
+distances <- dist(dtm_df, method = "euclidean")
+groups <- hclust(distances, method = "ward.D")
+plot(groups)
+```
+
+```{r}
+library(slam)
+cosine_dist_mat <- 1 - crossprod_simple_triplet_matrix(dtm3)/(sqrt(col_sums(dtm3^2) %*%
+                                                                       t(col_sums(dtm3^2))))
+```
+```{r}
+
+```
+

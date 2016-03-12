@@ -84,3 +84,30 @@ dtm <- DocumentTermMatrix(test)
 test <- findFreqTerms(dtm, 50)
 
 docsdissim <- dist(test, method = "cosine")
+
+#########
+
+dtm <- DocumentTermMatrix(test)
+
+test <- findFreqTerms(dtm, 50)
+
+docsdissim <- dist(test, method = "cosine")
+
+#### Test cleaning 
+
+test <- VCorpus(VectorSource(c(as.String(books[[20]]), as.String(books[[15]]) )))
+a <- Sys.time()
+test <- test %>% 
+    tm_map(stripWhitespace) %>%
+    tm_map(content_transformer(tolower)) %>%
+    tm_map(removeWords, stopwords("english")) %>%
+    tm_map(stemDocument) 
+# Stemcompletion?
+
+saveRDS(test, "test.RDS")
+
+dtm <- DocumentTermMatrix(test)
+dtm_mat <- as.data.frame(dtm)
+Sys.time() - a
+test <- findFreqTerms(dtm, 50)
+
