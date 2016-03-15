@@ -16,7 +16,7 @@ metadata <- data.frame(title = character(),
                        translation_year = character(),
                        topic = character(),
                        directory = character(),
-                       note = character(),
+                       description = character(),
                        stringsAsFactors = F
                        )
 
@@ -232,6 +232,13 @@ metadata[24,] <- c("The Works of Flavius Josephus, Vol III",
                    "William Whitston, A.M"
 )
 
+# Add shortnames which are easier to plot
+shortname <- c("Geo Dictionary", "Tacitus Hist 3", "Pelopennesian 2", "Livy I", "Decline & Fall 3", "Josephus 2", "Description of Greece", "Livy 3", "Decline & Fall 4", "Decline and Fall 2", "Tacitus Annals 1", "Livy 5", "Josphus 1", "Decline & Fall 5", "Tacitus Hist ?", "Decline & Fall 6", "Decline & Fall 1", "History of Rome 3", "Pelopennesian 1", "Livy History", "Joesphus 4", "Tacitus Hist 4", "Pliny Nat. Hist", "Josephus 3")
+metadata$shortname <- shortname
+
+# Ad numerical id variable to check against later construct names. 
+metadata$id <- seq_along(metadata[,1])
+
 ### Apply metadata to corpus #####
 for (i in seq_along(corpus)){
     meta(corpus[[i]], "author") <- metadata[i,"author"]
@@ -240,10 +247,10 @@ for (i in seq_along(corpus)){
     meta(corpus[[i]], "translation_year") <- metadata[i,"translation_year"]
     meta(corpus[[i]], "topic") <- metadata[i, "topic"]
     meta(corpus[[i]], "directory") <- metadata[i, "directory"]
-    meta(corpus[[i]], "note") <- metadata[i, "note"]
+    meta(corpus[[i]], "description") <- metadata[i, "description"]
+    meta(corpus[[i]], "shortname") <- metadata[i, "shortname"]
 }
 
+
+saveRDS(metadata, "Data/metadata.RDS")
 saveRDS(corpus, "Data/corpus.RDS")
-
-
-shortnames <- c("Greek/Roman Dictionary", "Tacitus History III", "Pelopennesian War II", "Livy I", "Decline and Fall III", "Josephus II", "Description of Greece", "Livy III", "Decline and Fall IV", "Decline and Fall II", "Tacitus Annals I", "Livy V", "Josphus I", "Decline and Fall V", "Tacitus History", "Decline and Fall VI", "Decline and Fall I", "History of Rome III", "Pelopennesian War I", "Livy History", "Joesphus IV", "Tacitus IV", "Pliny Nat. History", "Josephus III")

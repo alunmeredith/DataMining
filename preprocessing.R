@@ -17,4 +17,12 @@ corpus <- corpus %>%
     tm_map(stemDocument) # Equivalence class
     # Stemcompletion?
 
+# Additional words to be removed
+words <- c("i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x")
+words <- c(words, "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten")
+words <- c(words, "p", "na", "â", letters)
+
+corpus <- corpus %>% 
+    tm_map(removeNumbers) %>%
+    tm_map(removeWords, words)
 saveRDS(corpus, "Data/corpus.RDS")
