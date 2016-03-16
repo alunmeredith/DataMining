@@ -1,5 +1,5 @@
 # Turns each book into a single vector of characters.
-
+library(xml2)
 # List files in that directory
 books_dir <- list.files("../gap-html/gap-html/", full.names = T)
 books <- list()

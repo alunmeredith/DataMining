@@ -233,13 +233,41 @@ metadata[24,] <- c("The Works of Flavius Josephus, Vol III",
 )
 
 # Add shortnames which are easier to plot
-shortname <- c("Geo Dictionary", "Tacitus Hist 3", "Pelopennesian 2", "Livy I", "Decline & Fall 3", "Josephus 2", "Description of Greece", "Livy 3", "Decline & Fall 4", "Decline and Fall 2", "Tacitus Annals 1", "Livy 5", "Josphus 1", "Decline & Fall 5", "Tacitus Hist ?", "Decline & Fall 6", "Decline & Fall 1", "History of Rome 3", "Pelopennesian 1", "Livy History", "Joesphus 4", "Tacitus Hist 4", "Pliny Nat. Hist", "Josephus 3")
+shortname <- c("Geo Dictionary", "Tacitus Hist 3", "Pelopennesian 2", "Livy 1", "Decline & Fall 3", "Josephus 2", "Description of Greece", "Livy 3", "Decline & Fall 4", "Decline and Fall 2", "Tacitus Annals 1", "Livy 5", "Josephus 1", "Decline & Fall 5", "Tacitus Hist", "Decline & Fall 6", "Decline & Fall 1", "History of Rome 3", "Pelopennesian 1", "Livy History", "Josephus 4", "Tacitus Hist 4", "Pliny Nat. Hist", "Josephus 3")
 metadata$shortname <- shortname
 
 # Ad numerical id variable to check against later construct names. 
 metadata$id <- seq_along(metadata[,1])
 
-### Apply metadata to corpus #####
+metadata[1,"volume"] <- 2
+metadata[1,"translator"] <- NA
+
+metadata[2,"translator"] <- "Arthur Murphy"
+metadata[2, "title"] <- "Works of Cornelius Tacitus"
+metadata[2, "volume"] <- 5
+metadata[2, "translation_year"] <- 1805
+
+metadata[4, "translation_year"] <- 1797
+
+metadata[5, "translation_year"] <- 1830
+
+metadata[6, "description"] <- "Added 3 additional dissertations to original trnlsation"
+
+metadata[7, "translation_year"] <- 1794
+metadata[13, "description"] <- "Revised by Samuel Burder"
+metadata[18, "description"] <- "Original Language German"
+
+##### TRANSLATOR
+metadata$translator <- c(NA, "Arthur Murphy", "William Smith", "George Baker", "Edward Gibbon", "Havercamp", "unknown", "George Baker", "Thomas Bowdler", "Thomas Bowdler", "Arthur Murphy", "George Baker", "William Whiston", "Edward Gibbon", "William Tyler", "Edward Gibbon", "Edward Gibbon", "William Dickson", "William Smith", "William Gordon", "William Whiston", "Arthur Murphy", "John Bostock", "William Whiston")
+
+##### Volume
+metadata$volume <- c(2, 5, 2, 1, 3, 2, 3, 3, 4, 2, 1, 5, 1, 5, NA, 6, 1, 3, 1, NA, 4, 4, NA,3)
+
+metadata$group <- c("Dictionary", "Tacitus", "Peloponnesian", "Livy", "Decline & Fall", "Josephus", "Description of Greece", "Livy", "Decline & Fall", "Decline & Fall", "Tacitus", "Livy", "Josephus", "Decline & Fall", "Tacitus", "Decline & Fall", "Decline & Fall", "History of Rome", "Pelopennesian", "Livy", "Josephus", "Tacitus", "Pliny", "Josephus")
+metadata$group <- as.factor(metadata$group)
+
+############# Apply metadata to corpus #######################
+
 for (i in seq_along(corpus)){
     meta(corpus[[i]], "author") <- metadata[i,"author"]
     meta(corpus[[i]], "title") <- metadata[i,"title"]
@@ -249,6 +277,7 @@ for (i in seq_along(corpus)){
     meta(corpus[[i]], "directory") <- metadata[i, "directory"]
     meta(corpus[[i]], "description") <- metadata[i, "description"]
     meta(corpus[[i]], "shortname") <- metadata[i, "shortname"]
+    meta(corpus[[i]], "group") <- metadata[i, "group"]
 }
 
 

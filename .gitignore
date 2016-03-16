@@ -1,3 +1,7 @@
 .Rproj.user
 .Rhistory
 .RData
+Readme.txt
+Data/*
+RScripts.Rproj
+.gitignore
