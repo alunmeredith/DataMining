@@ -36,7 +36,7 @@ for (book in books_dir) {
         #processing_text <- tolower(processing_text)
         
         # Concatonate all pages into one book 
-        book_text <<- c(book_text, processing_text)
+        book_text <<- c(book_text, html_text)
         #book_titles <<- c(book_titles,  paste0(title, collapse = " "))
     }
     # Build a single list of books Labeled with their directory name and title

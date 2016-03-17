@@ -263,7 +263,7 @@ metadata$translator <- c(NA, "Arthur Murphy", "William Smith", "George Baker", "
 ##### Volume
 metadata$volume <- c(2, 5, 2, 1, 3, 2, 3, 3, 4, 2, 1, 5, 1, 5, NA, 6, 1, 3, 1, NA, 4, 4, NA,3)
 
-metadata$group <- c("Dictionary", "Tacitus", "Peloponnesian", "Livy", "Decline & Fall", "Josephus", "Description of Greece", "Livy", "Decline & Fall", "Decline & Fall", "Tacitus", "Livy", "Josephus", "Decline & Fall", "Tacitus", "Decline & Fall", "Decline & Fall", "History of Rome", "Pelopennesian", "Livy", "Josephus", "Tacitus", "Pliny", "Josephus")
+metadata$group <- c("Dictionary", "Tacitus", "Peloponnesian", "Livy", "Decline & Fall", "Josephus", "Description of Greece", "Livy", "Decline & Fall", "Decline & Fall", "Tacitus", "Livy", "Josephus", "Decline & Fall", "Tacitus", "Decline & Fall", "Decline & Fall", "History of Rome", "Peloponnesian", "Livy", "Josephus", "Tacitus", "Pliny", "Josephus")
 metadata$group <- as.factor(metadata$group)
 
 ############# Apply metadata to corpus #######################

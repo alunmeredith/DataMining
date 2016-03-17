@@ -1,0 +1,58 @@
+---
+title: "kmeans"
+author: "Alun"
+date: "16 March 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+```
+
+```{r libraries, message=FALSE, warning=FALSE, include=FALSE}
+require(tm)
+require(Matrix)
+require(cluster)
+require(dplyr)
+require(quanteda)
+```
+
+Cl
+```{r Load Data, echo=FALSE, eval=FALSE}
+source("dtm_cleaning.R")
+ngrams <- t(readRDS("data/ngrams.rds"))
+metadata <- readRDS("data/metadata.rds")
+rownames(ngrams) <- metadata$shortname
+dtm <- dtm_clean(ngrams)
+dtm_dissim <- dissim(dtm)
+```
+
+```{r Load Data2, echo=FALSE}
+source("dtm_cleaning.R")
+ngrams <- (readRDS("data/corpus.rds")) %>% DocumentTermMatrix()
+metadata <- readRDS("data/metadata.rds")
+rownames(ngrams) <- metadata$shortname
+dtm <- dtm_clean(ngrams)
+dtm_dissim <- dissim(dtm)
+```
+
+```{r elbow plot}
+range <- 1:10
+perf <- vector()
+for (i in range) {
+    print(i)
+    perf[i] <- sum(kmeans(dtm_dissim,centers=i,nstart=25)$withinss)
+}
+perf
+plot(range, perf[range], type = "b", xlab="number of clusters", ylab="Within cluster sum of squares") 
+```
+
+```{r spherical k means clustering}
+pam <- pam(dtm, 3, stand = T)
+diss <- pam$diss
+
+pam(diss,3, diss = T) %>% clusplot(3, labels=2, lines=0)
+pam(diss,3, diss = T, stand = T) %>% clusplot(3, labels=2, lines=0)
+pam <- pam(dtm_dissim, 3, diss = T, keep.diss = T) 
+clusplot(pam, 3, labels=5, lines=0, color = T, sub = " ")
+```

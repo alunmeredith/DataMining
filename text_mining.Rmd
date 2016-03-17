@@ -7,7 +7,7 @@ output:
     toc_depth: 5
 ---
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
 ```
 
 ```{r libraries, message=FALSE, warning=FALSE, include=FALSE}
@@ -15,6 +15,8 @@ require(tm)
 require(Matrix)
 require(cluster)
 require(dplyr)
+require(quanteda)
+source("dtm_cleaning.R")
 ```
 
 # Building Term Document Matrix
@@ -39,9 +41,14 @@ metadata <- readRDS("data/metadata.rds")
 bigrams <- t(readRDS("data/bigrams.rds"))
 trigrams <- t(readRDS("data/trigrams.rds"))
 ngrams <- t(readRDS("data/ngrams.rds"))
-dtm <- DocumentTermMatrix(ngrams)
-rownames(dtm) <- metadata$shortname
-dtm
+unigrams <- DocumentTermMatrix(corpus)
+
+rownames(unigrams) <- metadata$shortname
+rownames(bigrams) <- metadata$shortname
+rownames(trigrams) <- metadata$shortname
+rownames(ngrams) <- metadata$shortname
+
+dtm <- unigrams
 ```
 Produces a **sparse document term matrix** (with large maximal term length). For computational reasons we remove sparse terms. Here we choose to **remove any term which only appears in one document**, as it can't help link that document to another, which is our goal. 
 ```{r Clean terms, echo=FALSE}
@@ -49,17 +56,6 @@ dtm2 <- removeSparseTerms(dtm, 0.95) # Remove terms which only appear in 1 docum
 rownames(dtm2) <- metadata$shortname
 dtm2
 
-# Defie a function which returns frequency table for document term matrix
-freq_table <- function(dtm) {
-    if (!is.data.frame(dtm)) dtm <- as.data.frame(as.matrix(dtm))
-    if (dim(dtm)[1] > dim(dtm)[2]) dtm <- t(dtm)
-    apply(dtm, 1, function(x) {
-        x %>%
-        sort(decreasing = T) %>%
-        head(10) %>%
-        names()
-        })
-}
 dtm2_freq <- freq_table(dtm2)
 ```
 The **sparsity has deceased** and the maximum term length is something more reasonable. We can view the most frequent terms of each book to see which terms are highly weighted. 
@@ -73,14 +69,6 @@ t(dtm2_freq) %>%
 We can see some themes such as the geographic dictionary having terms like river, citi, town and place. However also there are a lot of **repeated and low impact terms** like now, war, one, two, roman. So we **weight the documents with inverse document frequency and normalise** so that long books are evenly weighted vs. short books.  
 
 ```{r TFIDF, fig.width=10}
-# Define a function that cleans the document term matrix to a point where a dissimilarity matrix can be made. 
-dtm_clean <- function(dtm, meta = metadata, sparsity = .95, idf = TRUE){
-    rownames(dtm) <- meta$shortname
-    dtm %>% 
-        removeSparseTerms(.95)  %>%
-        weightTfIdf(normalize = T) %>%
-        return()
-}
 dtm3 <- dtm_clean(dtm)
 dtm3_freq <- freq_table(dtm3)
 ```
@@ -95,31 +83,10 @@ We can see now using term frequency - inverse document frequency (tf-idf) that t
 
 ### Calculate dissimilarity matrix
 Finally we calculate a distance measure. In this case we use cosine similarity. Use matrix package to manipulate sparse matrix. Otherwise computer doesn't have enough memory. 
-```{r Cosine Similarity}
-# Define a function which computes cosine dissimilarity matrix of a dtm
-dissim <- function(dtm, meta = metadata){
-    # Convert into sparse matrix from "Matrix" package
-    m <- Matrix::sparseMatrix(i = dtm$i, j = dtm$j, x = dtm$v,
-                   dims = c(dtm$nrow, dtm$ncol)) 
-    
-    # Normalise lengths of documents
-    row_norms <- sqrt(rowSums(m ^ 2))
-    row_norms <- t(crossprod(sign(m), Diagonal(x = row_norms)))
-    row_norms@x <- 1/row_norms@x
-    m_norm <- m * row_norms
-    
-    # Finally, we can find cosine similarity
-    sim <- tcrossprod(m_norm)
-    colnames(sim) <- meta$shortname
-    rownames(sim) <- meta$shortname
-    return(1 - sim)
-}
-
-dtm3_dissim <- dissim(dtm3)
-```
 
 #  Heirarchical clustering
 ```{r MultiDimensional Scaling, fig.height=6}
+dtm3_dissim <- dtm %>% as.matrix() %>% dtm_clean(.3, idf = F) %>% dissim()
 plot(agnes(dtm3_dissim, method = "ward"), which.plots = 2)
 heatmap(as.matrix(dtm3_dissim), Rowv = NULL)
 ```
@@ -164,18 +131,22 @@ As seen before we clustered reatively well by topic but not the books of the sam
 
 So to try and analyse the language and cluster the authors, we remove a lot more of the sparsity and don't use idf. # Although we do still normalise so clusters aren't dependent on book length. (don't because don't know how)
 ```{r}
-dtm4 <- dtm_clean(dtm, sparsity = .1, idf = TRUE)
+# Corpus of words which appear at least 100 times in the document
+ctrl <- list(bounds = list(local = c(100,Inf)))
+dtm4 <- DocumentTermMatrix(corpus, control = ctrl)
+dtm4 <- dtm_clean(dtm4, .5, idf = F)
 dtm4_dissim <- dissim(dtm4)
 
 plot(agnes(dtm4_dissim, method = "ward"), which.plots = 2)
 heatmap(as.matrix(dtm4_dissim), Rowv = NULL)
+freq_table(dtm4)
 ```
 
 
 ## K means
 
 Spherical k means clustering works on cosine similarity as well. 
-```{r spherical k means clustering}
+```{r spherical k means clustering, eval=FALSE, include=FALSE}
 library(skmeans)
 clust_sk <- skmeans(dtm3, 8, method = 'genetic', control = list(verbose = TRUE))
 sort(clust_sk$cluster)
@@ -229,7 +200,7 @@ This also suggests that the sparsity tollerated was probably too low.
 
 This cluster is interesting because although it revolves around the word constantinople it uses this word primarily as a proxy for talking about history. Because constaninople became the roman city of byzantium, using the word constantinople to a high frequency means you were talking about history. Description of greecy, pliny nat.hist josephus I (and Livy I) are all talking about pre-roman history.  
 
-```{r}
+```{r, eval=FALSE, include=FALSE}
 test <- quanteda::corpus(corpus)
 test$documents <- metadata$shortname
 kwic(test, "geographc") -> t2
