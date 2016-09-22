@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<!-- saved from url=(0051)http://comp6237.ecs.soton.ac.uk/cw/coursework2.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>COMP6237 Data Mining</title>
+    <link rel="stylesheet" href="./COMP6237 Data Mining_files/styles.css">
+    <link rel="stylesheet" href="./COMP6237 Data Mining_files/pygment_trac.css">
+    <script src="./COMP6237 Data Mining_files/jquery.min.js"></script><style type="text/css"></style>
+    <script src="./COMP6237 Data Mining_files/respond.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <!--[if lt IE 8]>
+    <link rel="stylesheet" href="../stylesheets/ie.css">
+    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  </head>
+  <body>
+      
+    <div class="wrapper">
+      <section>
+        <div id="title">
+          <div style="background-image: url(../images/matrix.png); height: 250px; position: relative">
+            <div style="position: absolute; bottom: 0; width: 850px; opacity:0.8; filter:alpha(opacity=80); background-color: #000000; padding-top:20px">
+              <h1>COMP6237 Data Mining</h1>
+              <p>Coursework 2: Understanding Data</p>
+            </div>
+          </div>
+          <hr>
+          <span class="credits left">Maintained by <a href="http://www.ecs.soton.ac.uk/people/jsh2">Dr Jonathon Hare</a>.</span>
+        </div>
+        <div style="text-align: justify">
+         <p><em>COMP6237 Data Mining</em></p>
+
+<h1 id="coursework-2-understanding-data">Coursework 2: Understanding Data</h1>
+
+<h2 id="brief">Brief</h2>
+<p>Due date: Thursday 17th March 2016, 16:00.<br>
+Handin: <a href="http://handin.ecs.soton.ac.uk/handin/1516/COMP6237/3/">1516/COMP6237/3/</a><br>
+Required files: report.pdf<br>
+Data: <a href="https://secure.ecs.soton.ac.uk/notes/comp6237/data/gap-html.zip">gap-html.zip</a><br>
+Credit: 20% of overall module mark</p>
+
+<h2 id="overview">Overview</h2>
+<p>In this coursework your need to perform exploratory/descriptive data mining on a data set that we provide. You will need to write scripts to parse the data into a usable format, perform some kind of feature extraction and then apply standard techniques to explore relationships between data items, such as K-Means and Hierarchical Clustering, and data-analytic visualisation techniques like Multidimensional Scaling. Finally you need to put together a report that details your approach and your findings.</p>
+
+<h2 id="details">Details</h2>
+<p>The data you will be using for this assignment is a set of 24 texts about Antiquity (both classical and secondary literature); the original books have been scanned and run through an Optical Character Recognition system to produce an HTML document for each page. The scans and OCR data were produced by Google as part of the <a href="https://en.wikipedia.org/wiki/Google_Books_Library_Project">Google Books Library Project</a>. A typical scanned page and its OCR result is shown below:</p>
+
+<div style="text-align:center">
+<div style="float:left">
+<img width="400" src="./COMP6237 Data Mining_files/00000012.png">
+</div>
+<div style="float:left">
+	&nbsp;
+</div>
+<div style="float:right">
+<iframe width="400" height="716" src="./COMP6237 Data Mining_files/00000012.html" kwframeid="1"></iframe>
+</div>
+<div style="clear:both">
+Book scanning example.<br><br>
+</div>
+</div>
+
+<p>You can download the a Zip file containing the HTML pages with the OCR results <a href="https://secure.ecs.soton.ac.uk/notes/comp6237/data/gap-html.zip">here</a>. Inside the zip file, their are 24 folders representing the 24 texts, with each page represented by the sequentially numbered HTML files. We haven’t included the original scanned images due to their size (around 4GB), however, you can browse the original scans <a href="https://secure.ecs.soton.ac.uk/notes/comp6237/data/gap-images/">here</a> if you wish.</p>
+
+<p><strong>The aim of this coursework is for you to explore how these 24 texts are related by applying appropriate data mining techniques.</strong> You’ll need to create software to extract the contents of the HTML files and build some form of feature representation to which you can apply standard descriptive data mining techniques. At a minimum, we’re expecting you to experiment with Hierarchical Clustering and Multi-Dimensional Scaling, however you might also explore other approaches.</p>
+
+<h3 id="deliverable">Deliverable</h3>
+<p>You need to produce a <strong>concise</strong> 2-page “working notes” paper (see http://ceur-ws.org/Vol-1043/ for examples of standard academic working notes papers) using the <a href="https://www.acm.org/publications/proceedings-template">ACM proceedings style</a>. The two page limit on the paper is final; no additional pages or appendices are permitted. We’re expecting the paper to illustrate what you have done and also demonstrate your ability to interpret what the data mining techniques are showing.</p>
+
+<h2 id="marking-and-feedback">Marking and Feedback</h2>
+<p>Full details of the marking scheme are given below:</p>
+
+<h4 id="learning-outcomes">Learning Outcomes</h4>
+<ul>
+  <li>Solve real-word data-mining, data-indexing and information extraction tasks</li>
+  <li>Demonstrate knowledge and understanding of:
+    <ul>
+      <li>Key concepts, tools and approaches for data mining on complex unstructured data sets</li>
+      <li>Theoretical concepts and the motivations behind different data-mining approaches</li>
+    </ul>
+  </li>
+</ul>
+
+<h3 id="mark-scheme">Mark Scheme</h3>
+
+<p>The working notes paper will be marked using the following criteria:</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Criterion</th>
+      <th>Description</th>
+      <th>Marks</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Experimentation</td>
+      <td>Analyse the problem and define suitable preprocessing and feature extraction operations</td>
+      <td>28</td>
+    </tr>
+    <tr>
+      <td>Application of techniques</td>
+      <td>Show ability to apply exploratory data mining techniques</td>
+      <td>28</td>
+    </tr>
+    <tr>
+      <td>Analysis</td>
+      <td>Reflection on what can be understood from the data through the application of exploratory techniques</td>
+      <td>28</td>
+    </tr>
+    <tr>
+      <td>Reporting</td>
+      <td>Clear and professional reporting</td>
+      <td>16</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Standard ECS late submission penalties apply.</p>
+
+<p>Written individual feedback will be given covering the above points, and will be emailed out once marking is complete.</p>
+
+<h2 id="tools">Tools</h2>
+<p>You can use any available existing tools, programming environments and software libraries for this coursework. It is however important that you include full details in your report - this must include specific details about which specific variant of the standard techniques are being used, with references as appropriate. Also include any details of the implementation doing something non-standard (for example making approximations in the sake of efficiency), and all parameters.</p>
+
+<h2 id="questions">Questions</h2>
+<p>If you have any problems/questions then <a href="mailto:jsh2@ecs.soton.ac.uk">email</a> or speak to <a href="http://ecs.soton.ac.uk/people/jsh2">Jon</a> in his office or after the lectures.</p>
+
+
+        </div>
+      </section>
+      <section style="text-align:center">
+        <span style="font-size: 11px; font-family: &#39;OpenSansRegular&#39;, " helvetica="" neue",="" helvetica,="" arial,="" sans-serif;="" font-weight:="" normal;="" color:="" #696969;"="">Copyright ©2016 <a href="http://www.soton.ac.uk/">The University of Southampton</a>. All rights reserved.</span>
+      </section>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->    
+  
+
+</body></html>

@@ -1,0 +1,210 @@
+---
+title: "Text Mining"
+author: "Alun"
+date: "12 March 2016"
+output: 
+  html_document: 
+    toc_depth: 5
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE)
+```
+
+```{r libraries, message=FALSE, warning=FALSE, include=FALSE}
+require(tm)
+require(Matrix)
+require(cluster)
+require(dplyr)
+require(quanteda)
+source("dtm_cleaning.R")
+```
+
+# Building Term Document Matrix
+### Extract individual words from html:
+Using the "//span[@class='ocr_cinfo']" tag. Objects with this tag are in two paragraphs per page, the first being the title and second being the text. We remove the title of each page and focus only on the text. 
+Build a corpus, with each document being a book. Joining each page of seperate words together into a book and each book together into a corpus. 
+
+### Preprocessing:
+The preprocessing of the corpus is described by the steps below. Steps in brackets were implemented later. 
+
+ - Load the corpus
+ - Tokenise
+ - Remove stop words
+ - Case folding
+ - Class equivalence
+ - (ngrams)
+ - (extra stop word removal)
+
+```{r Load Data, echo=FALSE}
+corpus <- readRDS("data/corpus.rds")
+metadata <- readRDS("data/metadata.rds")
+bigrams <- t(readRDS("data/bigrams.rds"))
+trigrams <- t(readRDS("data/trigrams.rds"))
+ngrams <- t(readRDS("data/ngrams.rds"))
+unigrams <- DocumentTermMatrix(corpus)
+
+rownames(unigrams) <- metadata$shortname
+rownames(bigrams) <- metadata$shortname
+rownames(trigrams) <- metadata$shortname
+rownames(ngrams) <- metadata$shortname
+
+dtm <- unigrams
+```
+Produces a **sparse document term matrix** (with large maximal term length). For computational reasons we remove sparse terms. Here we choose to **remove any term which only appears in one document**, as it can't help link that document to another, which is our goal. 
+```{r Clean terms, echo=FALSE}
+dtm2 <- removeSparseTerms(dtm, 0.95) # Remove terms which only appear in 1 document
+rownames(dtm2) <- metadata$shortname
+dtm2
+
+dtm2_freq <- freq_table(dtm2)
+```
+The **sparsity has deceased** and the maximum term length is something more reasonable. We can view the most frequent terms of each book to see which terms are highly weighted. 
+
+```{r And look at the high frequency terms, results="asis"}
+t(dtm2_freq) %>% 
+    xtable::xtable() %>%
+    xtable::print.xtable(type = "html")
+```
+
+We can see some themes such as the geographic dictionary having terms like river, citi, town and place. However also there are a lot of **repeated and low impact terms** like now, war, one, two, roman. So we **weight the documents with inverse document frequency and normalise** so that long books are evenly weighted vs. short books.  
+
+```{r TFIDF, fig.width=10}
+dtm3 <- dtm_clean(dtm)
+dtm3_freq <- freq_table(dtm3)
+```
+Looking at the frequency table again...
+```{r tfIDF table, results="asis"}
+t(dtm3_freq) %>% 
+    xtable::xtable() %>%
+    xtable::print.xtable(type = "html")
+```
+
+We can see now using term frequency - inverse document frequency (tf-idf) that the **highest weighted terms are now primarily names**. herod, justinian etc. This is suggestive that the clustering later will be about the people and places (names) associated with those books. 
+
+### Calculate dissimilarity matrix
+Finally we calculate a distance measure. In this case we use cosine similarity. Use matrix package to manipulate sparse matrix. Otherwise computer doesn't have enough memory. 
+
+#  Heirarchical clustering
+```{r MultiDimensional Scaling, fig.height=6}
+dtm3_dissim <- dtm %>% as.matrix() %>% dtm_clean(.3, idf = F) %>% dissim()
+plot(agnes(dtm_dissim, method = "ward"), which.plots = 2)
+heatmap(as.matrix(dtm_dissim), Rowv = NULL)
+```
+**We see 3 main clusters**. Looking at the cluster of Josephus 2, Josephus 3, Decline and Fall 6 and Peleponesian I. They all reference Herod and Jew in their high weighting list. The description of greece and Pliny natural history mentions arabs and constantinople while livy 5 and josephus 4 which are closely related mentions constantinople and the goths. 
+
+We can see the dictionary isn't appropriately being isolated. This is likely because we got rid of the sparse terms. The thing that made the dictionary so distinct for other text is that it has a large set of terms which are all mentioned only once. **can we do it without removing sparsity?**
+
+We can also see that the different set of books are sometimes but not consistently grouped together by any of these methods. An example in the HDS graph is Livy I and Jospehus I being grouped together. 
+
+After trying many of the different methods and both manhattan and euclidean distance, the clusters never change with the exception of single linkage, where Livy History has its own cluster. 
+
+From the heatmap, where dissimilarity is yellow and similarity is red. You can see the documents are quite dissimilar with few exceptions. 
+
+In summary the clustering seems to have done a reasonable job at joining similar topics together, primarily by isolating names and topics of the text. However it hasn't clustered together similar authors or writing styles. For this you would want to look at the more frequent terms in each document. Also using tf-idf likely has a negative impact in this regard because words that are similar across 6 books. 
+
+## Ngrams
+
+```{r Bigrams & Trigrams, eval=FALSE, include=FALSE}
+bigram_dtm <- dtm_clean(bigrams)
+bigram_freq <- freq_table(bigram_dtm)
+bigram_dissim <- dissim(bigram_dtm)
+plot(agnes(bigram_dissim, method = "ward"), which.plots = 2)
+
+trigram_dtm <- dtm_clean(trigrams)
+trigram_freq <- freq_table(trigram_dtm)
+trigram_dissim <- dissim(trigram_dtm)
+plot(agnes(trigram_dissim, method = "ward"), which.plots = 2)
+
+ngram_dtm <- dtm_clean(ngrams)
+ngram_dissim <- dissim(ngram_dtm)
+ngram_freq <- freq_table(ngram_dtm)
+plot(agnes(ngram_dissim, method = "ward"), which.plots = 2)
+heatmap(as.matrix(dtm3_dissim), Rowv = NULL)
+```
+
+We find with trigrams many of the highly weighted trigrams come from printing constructs such as "na na book" or "vol ii p". To counter this we remove letters, roman numerals and 'na' from our corpus. On the positive side less of these are based on names. 
+
+Haven't removed all possible roman numerals so some of them remain. Clustering trigrams clusters books by the same author together much more, while maintaining most of the core topical clusters. This is likely because through books the same author is far more likely to use a phrase multiple times. 
+
+## Dense terms
+As seen before we clustered reatively well by topic but not the books of the same author. You imagine that the specific language of the author would be more heavily related to the text. Inverse document frequency however removes a lot of this effect because the author clusters are large portions of the data and language terms like "beautiful" may be quite common. 
+
+So to try and analyse the language and cluster the authors, we remove a lot more of the sparsity and don't use idf. # Although we do still normalise so clusters aren't dependent on book length. (don't because don't know how)
+```{r}
+# Corpus of words which appear at least 100 times in the document
+ctrl <- list(bounds = list(local = c(100,Inf)))
+dtm4 <- DocumentTermMatrix(corpus, control = ctrl)
+dtm4 <- dtm_clean(dtm4, .5, idf = F)
+dtm4_dissim <- dissim(dtm4)
+
+plot(agnes(dtm4_dissim, method = "ward"), which.plots = 2)
+heatmap(as.matrix(dtm4_dissim), Rowv = NULL)
+freq_table(dtm4)
+```
+
+
+## K means
+
+Spherical k means clustering works on cosine similarity as well. 
+```{r spherical k means clustering, eval=FALSE, include=FALSE}
+library(skmeans)
+clust_sk <- skmeans(dtm3, 8, method = 'genetic', control = list(verbose = TRUE))
+sort(clust_sk$cluster)
+summary(silhouette(clust_sk))
+```
+
+# High dimensional scaling
+
+```{r CMD}
+cmd <- cmdscale(dtm3_dissim)
+
+plot(cmd, pch = 19, xlim = range(cmd[,1]))
+text(cmd, pos = 4, labels = metadata$shortname)
+```
+
+# PCA
+```{r}
+pca <- prcomp(dtm3_dissim)
+plot(pca$rotation[,"PC1"], pca$rotation[,"PC2"])
+text(pca$rotation[,"PC1"], pca$rotation[,"PC2"], pos = 4, labels = metadata$shortname)
+```
+
+
+# Self organised maps
+Currently doesn't work but here it is working with wine data
+```{r, eval=FALSE, include=FALSE}
+data(wines)
+set.seed(7)
+
+training <- sample(nrow(wines), 120)
+Xtraining <- scale(wines[training, ])
+Xtest <- scale(wines[-training, ],
+               center = attr(Xtraining, "scaled:center"),
+               scale = attr(Xtraining, "scaled:scale"))
+
+som.wines <- som(Xtraining, grid = somgrid(5, 5, "hexagonal"))
+
+som.prediction <- predict(som.wines, newdata = Xtest,
+                          trainX = Xtraining,
+                          trainY = factor(wine.classes[training]))
+table(wine.classes[-training], som.prediction$prediction)
+```
+
+# Found that a small cluster Josephus I and Livy I were based around an alternate stemming of constantinople. 
+
+By joining constantn and constantnopl they join the cluster on the right. (Checked that they were describing contantnople not something different like constantine first.)
+
+The cluster on the right is th most dissimilar cluster. So we can see how the clusters can be heavily influenced by a single word. 
+
+This also suggests that the sparsity tollerated was probably too low. 
+
+This cluster is interesting because although it revolves around the word constantinople it uses this word primarily as a proxy for talking about history. Because constaninople became the roman city of byzantium, using the word constantinople to a high frequency means you were talking about history. Description of greecy, pliny nat.hist josephus I (and Livy I) are all talking about pre-roman history.  
+
+```{r, eval=FALSE, include=FALSE}
+test <- quanteda::corpus(corpus)
+test$documents <- metadata$shortname
+kwic(test, "geographc") -> t2
+t2 %>% group_by(docname) %>% summarize(n())
+
+```
+

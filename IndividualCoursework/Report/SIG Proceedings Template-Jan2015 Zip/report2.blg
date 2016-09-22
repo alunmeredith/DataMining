@@ -1,0 +1,10 @@
+This is BibTeX, Version 0.99dThe top-level auxiliary file: report2.aux
+The style file: abbrv.bst
+Database file #1: sigproc.bib
+I was expecting a `,' or a `}'---line 39 of file sigproc.bib
+ :  
+ :  year = {2009}.
+(Error may have been on previous line)
+I'm skipping whatever remains of this entry
+Warning--empty year in kaufmanpj
+(There was 1 error message)

@@ -1,0 +1,72 @@
+---
+title: "Entropy"
+author: "Alun"
+date: "16 March 2016"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraries, include = FALSE}
+library(ggplot2)
+library(entropy)
+library(tm)
+library(dplyr)
+library(Matrix)
+```
+
+```{r read data}
+# Read in corpus data
+corpus_raw <- readRDS("data/corpus_raw.RDS")
+corpus_cleaner <- readRDS("data/corpus_cleaner.RDS")
+corpus <- readRDS("data/corpus.RDS")
+
+# Convert to documetn term matrix
+dtm_raw <- (DocumentTermMatrix(corpus_raw))
+dtm_cleaner <- (DocumentTermMatrix(corpus_cleaner))
+dtm <- (DocumentTermMatrix(corpus))
+
+# Add rownames
+metadata <- readRDS("data/metadata.RDS")
+rownames(dtm_raw) <- metadata$shortname
+rownames(dtm_cleaner) <- metadata$shortname
+rownames(dtm) <- metadata$shortname
+
+```
+
+# Entropy
+```{r Entropy}
+require(ggthemes)
+df_raw <- as.data.frame(as.matrix(dtm_raw))
+entropies <- apply(df_raw, 1, function(x) {entropy.empirical(as.numeric(x), unit="log2")})
+data <- data.frame(entropy = entropies)
+data$id <- seq_len(nrow(data))
+data <- merge(data, metadata, by = "id")
+g_raw <- ggplot(data, aes(x = reorder(shortname, -entropy), y = entropy, fill = group))
+g_raw + geom_bar(stat = "identity") + coord_flip(ylim = c(7.5,15)) + guides(fill=FALSE) +
+    theme_tufte() + theme(axis.title.y=element_blank())
+
+df_cleaner <- as.data.frame(as.matrix(dtm_cleaner))
+entropies <- apply(df_cleaner, 1, function(x) {
+    entropy.empirical(as.numeric(x), unit="log2")})
+data <- data.frame(entropy = entropies)
+data$id <- seq_len(nrow(data))
+data <- merge(data, metadata, by = "id")
+g_cleaner <- ggplot(data, aes(x = reorder(shortname, -entropy), y = entropy, group = translator))
+g_cleaner + geom_bar(aes(fill = group), stat = "identity") + coord_flip(ylim = c(7.5,15)) + guides(fill=FALSE) +
+    theme_tufte() + theme(axis.title.y=element_blank())
+
+df <- as.data.frame(as.matrix(dtm))
+entropies <- apply(df, 1, function(x) {entropy.empirical(as.numeric(x), unit="log2")})
+data <- data.frame(entropy = entropies)
+data$id <- seq_len(nrow(data))
+data <- merge(data, metadata, by = "id")
+g <- ggplot(data, aes(x = reorder(shortname, -entropy), y = entropy, fill = translator))
+g + geom_bar(stat = "identity") + coord_flip(ylim = c(7.5,15)) + guides(fill=FALSE) +
+    theme_tufte() + theme(axis.title.y=element_blank())
+
+```
+
+
