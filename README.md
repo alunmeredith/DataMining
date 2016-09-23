@@ -71,6 +71,6 @@ Exploratory/descriptive data mining on  24 texts about Antiquity (both classical
 __Feedback__:
 Excellent analysis of the problem - very obvious in the report that you spent time looking at and understanding the data before applying the analytic techniques and then used this understanding to help with interpretation. Well done. 
 
-### CW2: Predictive Data Mining Group Project (Specification, [Report](https://github.com/miballeuk/airbnb/blob/master/Deliverables/DMCW2Report.pdf), Grade: 80/100)
+### CW2: Predictive Data Mining Group Project ([Specification](https://github.com/miballeuk/airbnb/blob/master/Specification.pdf), [Report](https://github.com/miballeuk/airbnb/blob/master/Deliverables/DMCW2Report.pdf), Grade: 80/100)
 This coursework used the AirBnB kaggle competition, predicting user destination countries from session data. Exploring the data and implementing and comparing a collection of models; neural networks, gradient boosting and random forests. 
 
